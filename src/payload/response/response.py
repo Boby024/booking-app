@@ -1,10 +1,14 @@
 from flask import make_response, jsonify
 
 
-def response_data(data, code):
+def response_data(data, code, serialized=False):
     headers = {
         "Content-Type": "text/json",
     }
+    if serialized == True:
+        data = [item.serialize() for item in data]
+        print(data)
+        return make_response(jsonify(data), code, headers)
     return make_response(jsonify(data), code, headers)
 
 

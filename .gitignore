@@ -127,3 +127,6 @@ dmypy.json
 
 # logs path
 src/logs
+
+# tesing python script
+w_tests.py

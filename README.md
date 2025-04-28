@@ -8,7 +8,7 @@ Next Features:
 - Calendar integration
 
 Key Learning Outcomes:
-- JWT authentication
+- Features around User: Login, Register, Role, JWT authentication, Email Verification
 - Working with Java’s date/time API
 - Implementing complex business rules
 - Creating scheduling algorithms

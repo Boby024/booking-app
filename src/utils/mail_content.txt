@@ -1,0 +1,8 @@
+Dear sender_info_surname, 
+
+Use the code below to verify your E-mail address: 
+email_verification_code
+
+Kind regards,
+
+Booking_APP, developed by Boby024
