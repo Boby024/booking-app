@@ -13,16 +13,19 @@ logger = Logger(name=__name__, log_file=Config.log_path)
 
 @user_bp.route('/register', methods=['POST'])
 def create_user():
+    user_created = None
     try:
         data = request.get_json()
         urr = UserRegisterRequest(**data)
+        # user = User.parse_raw(request.data)
+        print("urr ", urr.__dict__)
         user_created = user_service.register(urr)
-        if user_created is not None:
-            return response.response_data(user_created, 201)
-        else:
+        # print("user_created ", user_created)
+        if user_created == None:
             response.response_error("Invalid credentials! Or Email already used", 400)
     except Exception as e:
         return response.response_error("Missing Attributes: username, password, email, firstname, lastname", 400)
+    return response.response_data(user_created, 201)
 
 
 @user_bp.route('/login', methods=['POST'])

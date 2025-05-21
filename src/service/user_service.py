@@ -38,26 +38,33 @@ def send_email_verification(receiver, name):
     return False
 
 
+def update_user_roles(user, roles):
+    role_objects = Role.query.filter(Role.name.in_(roles)).all()
+
+    # Create UserRole entries
+    for role in role_objects:
+        user_role = UserRole(user_id=user.id, role_id=role.id)
+        db.session.add(user_role)
+
+
 def register(data: UserRegisterRequest):
+    print("data", data.__dict__)
     # check if email not exist
     user_found = User.query.filter_by(email=data.email).first()
-    if user_found is None:
+    if user_found != None:
         return None
 
-    roles = data.roles  # List of role names
-    role_objects = Role.query.filter(Role.name.in_(roles)).all()
     urr_dict = data.register_dict()
-
     new_user = User(**urr_dict)
+    print("new_user ", new_user.__dict__)
     new_user.set_password(data.password)
     db.session.add(new_user)
     db.session.commit()
 
     # Create UserRole entries
-    for role in role_objects:
-        user_role = UserRole(user_id=new_user.id, role_id=role.id)
-        db.session.add(user_role)
-    
+    # roles = data.roles  # List of role names
+    update_user_roles(new_user, ["USER"])
+
     # Send verification mail
     send_email_verification(receiver=new_user.email, name=new_user.firstname)
     return new_user.serialize()
