@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from ..service import user_service
 from ..utils.auth_security import token_required, roles_required
-from src.payload.request.user_request import UserRegisterRequest, UserLoginRequest
+from src.payload.request.user_register_request import UserRegisterRequest, UserLoginRequest
 from ..payload.response import response
 from ..utils.log import Logger
 from src.config import Config
@@ -13,19 +13,21 @@ logger = Logger(name=__name__, log_file=Config.log_path)
 
 @user_bp.route('/register', methods=['POST'])
 def create_user():
-    user_created = None
+    auth_resp = None
     try:
         data = request.get_json()
         urr = UserRegisterRequest(**data)
-        # user = User.parse_raw(request.data)
-        print("urr ", urr.__dict__)
-        user_created = user_service.register(urr)
-        # print("user_created ", user_created)
-        if user_created == None:
-            response.response_error("Invalid credentials! Or Email already used", 400)
+        auth_resp = user_service.register(urr)
+
+        if auth_resp is None:
+            return response.response_error("Invalid credentials! Or Email already used", 400)
     except Exception as e:
+        print(e)
         return response.response_error("Missing Attributes: username, password, email, firstname, lastname", 400)
-    return response.response_data(user_created, 201)
+
+    if auth_resp:
+        return response.response_data(auth_resp.serialize(), 201)
+    response.response_error("Internal Error", 500)
 
 
 @user_bp.route('/login', methods=['POST'])
@@ -33,32 +35,26 @@ def login():
     try:
         data = request.get_json()
         ulr = UserLoginRequest(**data)
-        token = user_service.login(ulr)
-        if token:
-            return response.response_data({"token": token}, 200)
+        login_response = user_service.login(ulr)
+        if login_response:
+            return response.response_data(login_response.serialize(), 200)
         else:
             return response.response_error("Invalid credentials!", 400)
-        
     except Exception as e:
+        print(e)
         return response.response_error("Missing username or password!", 400)
 
 
 @user_bp.route('/users', methods=['GET'])
-def get_users():
+@token_required
+def get_users(user):
     try:
+        logger.info("list of all users")
         users = user_service.get_users()
         return response.response_data(data=users, code=200, serialized=True)
     except Exception as e:
+        print(e)
         return response.response_error("Internal Server Error", 500)
-
-
-@user_bp.route('/roles', methods=['GET'])
-def get_roles():
-    try:
-        roles = user_service.get_roles()
-        return response.response_data(data=roles, code=200, serialized=True)
-    except Exception as e:
-        return response.response_error("Internal Server Error!", 500)
 
 
 @user_bp.route('/block', methods=['GET'])

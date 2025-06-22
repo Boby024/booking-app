@@ -1,12 +1,12 @@
 from flask import request
-from ..extensions import jwt
+import jwt
 from functools import wraps
-from datetime import datetime
 from ..model.user_model import User
 from ..config import Config
 from ..payload.response import response
 from flask_jwt_extended import get_jwt
 from sqlalchemy.exc import NoResultFound
+from ..utils import helper
 
 
 PASSWORD_SECRET_KEY = Config.PASSWORD_SECRET_KEY
@@ -19,18 +19,21 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         user = None
-        token = request.headers.get('Authorization')
-        if not token:
+        auth_header = request.headers.get('Authorization')
+
+        if not auth_header or not auth_header.startswith("Bearer "):
             return response.response_error("Token is missing!", 401)
+
+        token = auth_header.split(" ")[1]
 
         try:
             # Decode the JWT token
-            data = jwt.decode(token, PASSWORD_SECRET_KEY, algorithms=JWT_ACCESS_TOKEN_ALGORITHM)
+            data = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ACCESS_TOKEN_ALGORITHM])
             user_id = data.get('id')
-            username = data.get('username')
+            email = data.get('email')
 
             # Query the database for the user
-            user = User.query.filter_by(id=user_id, username=username).one_or_none()
+            user = User.query.filter_by(id=user_id, email=email).one_or_none()
             if not user:
                 return response.response_error("Invalid user!", 401)
 
@@ -40,19 +43,19 @@ def token_required(f):
             return response.response_error("Invalid token!", 401)
         except NoResultFound:
             return response.response_error("User not found in the database!", 401)
-    
+
         return f(user, *args, **kwargs)
     return decorated
 
 
-def generate_token(user):
+def generate_token(user, exp):
     payload = {
         "id": str(user.id),
-        'username': user.username,
-        'exp': datetime.utcnow() + JWT_ACCESS_TOKEN_EXPIRES,
-        'roles': user.roles,
+        'email': user.email,
+        'exp': exp,
+        # 'role': user_role
     }
-    token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ACCESS_TOKEN_ALGORITHM)
+    token = jwt.encode(payload=payload, key=JWT_SECRET_KEY, algorithm=JWT_ACCESS_TOKEN_ALGORITHM)
     return token
 
 

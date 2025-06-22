@@ -14,7 +14,7 @@ class AccessToken(db.Model):
     revoked = db.Column(db.Boolean, default=False, nullable=False)
     ip_address = db.Column(db.String(45), nullable=True)  # Optional, for tracking
     device_info = db.Column(db.Text, nullable=True)  # Optional, for additional details
-    created_at  = db.Column(db.DateTime, nullable=False) # When it was issued
+    created_at  = db.Column(db.DateTime, nullable=False, default=helper.get_dt_utcnow()) # When it was issued
     expires_at = db.Column(db.DateTime, nullable=False) # When the access token expires
     updated_at = db.Column(db.DateTime, nullable=True)
 

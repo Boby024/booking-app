@@ -33,7 +33,7 @@ class Config:
     MAIL_PORT = int(os.getenv(f'MAIL_PORT_{ENV}')) if os.getenv(f'MAIL_PORT_{ENV}') else 587
     MAIL_USE_TLS = True if os.getenv(f'MAIL_USE_TLS_{ENV}').lower() == "true" else False
     MAIL_USERNAME = os.getenv(f'MAIL_USERNAME_{ENV}')
-    MAIL_PASSWORD = os.getenv(f'MAIL_USERNAME_{ENV}')
+    MAIL_PASSWORD = os.getenv(f'MAIL_PASSWORD_{ENV}')
     MAIL_EMAIL_VERIFICATION_SUBJECT = os.getenv(f'MAIL_EMAIL_VERIFICATION_SUBJECT_{ENV}')
     MAIL_EMAIL_VERIFICATION_CONTENT = os.getenv(f'MAIL_EMAIL_VERIFICATION_CONTENT_{ENV}')
     MAIL_EMAIL_VERIFICATION_CONTENT_PATH_DEV = os.getenv(f'MAIL_EMAIL_VERIFICATION_CONTENT_PATH_{ENV}')

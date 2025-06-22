@@ -19,18 +19,17 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    surname = db.Column(db.String(120), nullable=True)
+    lastname = db.Column(db.String(120), nullable=True)
     firstname = db.Column(db.String(120), nullable=True)
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=helper.get_dt_utcnow())
     updated_at = db.Column(db.DateTime, nullable=True) # , default=datetime.now, onupdate=datetime.now)
     is_email_verified = db.Column(db.Boolean, default=False, nullable=False)
     # One-to-Many Relationship with AccessToken
-    access_tokens = db.relationship('AccessToken', back_populates='user', lazy=True, cascade="all, delete-orphan")
-    email_verifications = db.relationship('EmailVerification', back_populates='user', lazy=True, cascade="all, delete-orphan")
+    access_tokens = db.relationship('AccessToken', back_populates='user', lazy=True, cascade="all, delete-orphan", nullable=True)
+    email_verifications = db.relationship('EmailVerification', back_populates='user', lazy=True, cascade="all, delete-orphan", nullable=True)
     # Relationship to UserRole
-    user_roles = db.relationship('UserRole', back_populates='user', lazy=True)
-
+    user_roles = db.relationship('UserRole', back_populates='user', lazy=True, nullable=True)
 
     def set_password(self, plaintext_password):
         salted_password = plaintext_password + PASSWORD_SECRET_KEY  # Add secret key to password
@@ -44,9 +43,6 @@ class User(db.Model):
         return {
             "id": str(self.id),
             "email": self.email,
-            "surname": self.surname,
+            "lastname": self.lastname,
             "firstname": self.firstname,
         }
-
-    # def get_users(self):
-    #     return User.query.all()
